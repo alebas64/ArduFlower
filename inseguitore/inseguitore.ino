@@ -1,17 +1,5 @@
-//www.elegoo.com
-//2016.12.12
-
-/*
- Stepper Motor Control - one revolution
-
- This program drives a unipolar or bipolar stepper motor.
- The motor is attached to digital pins 8 - 11 of the Arduino.
-
- The motor should revolve one revolution in one direction, then
- one revolution in the other direction.
-
- */
-
+#define STEPS_HOMING 10
+#define STEPS_REVOLUTION 2038
 #include <Stepper.h>
 #include <Servo.h>
 int Pu_sx=A0, Pu_dx=A3, Pd_sx=A1, Pd_dx=A2; //pin arduino
@@ -20,6 +8,7 @@ int Pu_sx=A0, Pu_dx=A3, Pd_sx=A1, Pd_dx=A2; //pin arduino
 uint16_t u_sx=2000, u_dx=2000, d_sx=2000, d_dx=2000; //valore lettura
 const int stepsPerRevolution = 2038;  // change this to fit the number of steps per revolution
 int pos;
+uint16_t stepper_position=0;
 int limit1=12, limit2=13;
 bool state1=false, state2=false;
 Servo myServo_testa;
@@ -28,17 +17,18 @@ Stepper myStepper(stepsPerRevolution, 8, 10, 9, 11);
 
 void setup() {
     myServo_testa.attach(6);
-  // set the speed at 20 rpm:
-  myStepper.setSpeed(15);
-  pinMode(limit1,INPUT_PULLUP);
-  pinMode(limit2,INPUT_PULLUP);
-  // initialize the serial port:
-  Serial.begin(9600);
-Serial.println("u_sx     u_dx     d_sx     d_dx");
+    // set the speed at 20 rpm:
+    myStepper.setSpeed(15);
+    pinMode(limit1,INPUT_PULLUP);
+    pinMode(limit2,INPUT_PULLUP);
+    // initialize the serial port:
+
+    Serial.begin(9600);
+    Serial.println("u_sx     u_dx     d_sx     d_dx");
 }
 
 void loop() {
-    //lettura();
+    lettura();
     //stampa_val_ser();
     
     print_limits();
@@ -72,31 +62,9 @@ void loop() {
   */
 }
 
-void limit_check(){
-    state1 = digitalRead(limit1);
-    state2 = digitalRead(limit2);
-}
-void print_limits(){
-    Serial.print("state1: ");Serial.println(state1);
-    Serial.print("state2: ");Serial.println(state2);
-}
 void lettura(){
     u_sx=analogRead(Pu_sx);
     u_dx=analogRead(Pu_dx);
     d_sx=analogRead(Pd_sx);
     d_dx=analogRead(Pd_dx);
-}
-
-void stampa_val_ser(){
-    //Serial.println("u_sx     u_dx     d_sx     d_dx");
-    Serial.print(u_sx);Serial.print("     ");
-    Serial.print(u_dx);Serial.print("     ");
-    Serial.print(d_sx);Serial.print("     ");
-    Serial.print(d_dx);Serial.println("\n");
-    /*
-    Serial.print("u_sx: ");Serial.println(u_sx);
-    Serial.print("u_dx: ");Serial.println(u_dx);
-    Serial.print("d_sx: ");Serial.println(d_sx);
-    Serial.print("d_dx: ");Serial.println(d_dx);
-    */
 }
