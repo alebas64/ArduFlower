@@ -4,7 +4,7 @@ void servo_enable(){
     servo_reset();
 }
 
-void servo_movement(uint8_t position, uint8_t delay_per_degree){
+void servo_movement_absolute(uint8_t position, uint8_t delay_per_degree){
     if(position > servo_position){
         for (i = servo_position; i < position; i++) {
             myServo_testa.write(i);
@@ -19,20 +19,53 @@ void servo_movement(uint8_t position, uint8_t delay_per_degree){
     servo_position = position;
 }
 
-void servo_reset(){
-    if(servo_position==0){
-        myServo_testa.write(0);
-        delay(200);
-        myServo_testa.write(0);
-        delay(200);
-        myServo_testa.write(0);
-        delay(200);
-    }else{
-        for (i = servo_position; i > 0; i -= 1) { // goes from 0 degrees to 180 degrees
-            // in steps of 1 degree
-            myServo_testa.write(i);              // tell servo to go to position in variable 'pos'
-            delay(15);                       // waits 15ms for the servo to reach the position
-        }
+void servo_movement_relative(int8_t movement, uint8_t delay_per_degree){
+    if(movement<0&&servo_position==0){
+        return;
     }
-    
+    if(movement>0&&servo_position==180){
+        return;
+    }
+    uint8_t limit;
+    if(movement>0){
+        limit = (servo_position+movement)>=180 ? 180 : servo_position+movement;
+        Serial.print("Limit1:");Serial.println(limit);
+        for(i=servo_position;i<limit;i++){
+            myServo_testa.write(i);
+            delay(delay_per_degree);
+        }
+        servo_position = i;
+    }else{
+        limit = (servo_position-movement)<=0 ? 0 : servo_position-movement;
+        Serial.print("Limit2:");Serial.println(limit);
+        for(i=servo_position;i>limit;i--){
+            myServo_testa.write(i);
+            delay(delay_per_degree);
+        }
+        servo_position = i;
+    }
+}
+
+void servo_movement_relative2(int8_t movement, uint8_t delay_per_degree){
+    servo_position+=movement;
+    if(servo_position<0){
+        servo_position=0;
+        myServo_testa.write(servo_position);
+        return;
+    }
+    if(servo_position>180){
+        servo_position=180;
+        myServo_testa.write(servo_position);
+        return;
+    }
+    myServo_testa.write(servo_position);
+}
+
+void servo_reset(){
+    myServo_testa.write(90);
+    delay(200);
+    myServo_testa.write(90);
+    delay(200);
+    myServo_testa.write(90);
+    delay(200);
 }

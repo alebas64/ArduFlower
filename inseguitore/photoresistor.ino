@@ -1,19 +1,14 @@
 //lettura valori dei fotoresistori
-void readSUN(){
-    update_values();
-    letturaAnalogici();
-}
 
 void letturaAnalogici(){
-    nu_sx=analogRead(Pu_sx);
-    nu_dx=analogRead(Pu_dx);
-    nd_sx=analogRead(Pd_sx);
-    nd_dx=analogRead(Pd_dx);
+    u_sx=analogRead(Pu_sx);
+    u_dx=analogRead(Pu_dx);
+    d_sx=analogRead(Pd_sx);
+    d_dx=analogRead(Pd_dx);
 }
 
-void update_values(){
-    ou_sx=nu_sx;
-    ou_dx=nu_dx;
-    od_sx=nd_sx;
-    od_dx=nd_dx;
+float irraggiamento(){
+    float temp = ((float)(u_sx+u_dx+d_sx+d_dx+4)/(4*1024))*1000+(int16_t)OFFSET_IRRAGGIAMENTO;
+    //return (temp<=0) ? 0 : (int16_t)temp;
+    return temp;
 }

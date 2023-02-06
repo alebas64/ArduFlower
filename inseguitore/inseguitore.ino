@@ -1,33 +1,44 @@
 #include "costants.h"
 #include <Stepper.h>
 #include <Servo.h>
-int Pu_sx=A0, Pu_dx=A3, Pd_sx=A1, Pd_dx=A2; //pin arduino
+#include <Adafruit_Sensor.h>
+#include <DHT.h>
+#include <DHT_U.h>
+#include <LiquidCrystal.h>
+
+const int Pu_sx=A0, Pu_dx=A1, Pd_sx=A2, Pd_dx=A3; //pin arduino
 //2000 non può mai uscire dall' ADC di arduino
 //10bit = 0~1023
-uint16_t nu_sx=2000, nu_dx=2000, nd_sx=2000, nd_dx=2000; //valore nuova lettura
-uint16_t ou_sx=2000, ou_dx=2000, od_sx=2000, od_dx=2000; //valore vecchia lettura
+int16_t u_sx=2000, u_dx=2000, d_sx=2000, d_dx=2000; //valore lettura fotoresistori
 uint8_t i;
-uint16_t servo_position=0;
+int8_t servo_position=90;
+float temperature,humidity;
 
 Servo myServo_testa;
-Stepper myStepper(STEPS_REVOLUTION, 8, 10, 9, 11);
+Stepper myStepper(STEPS_REVOLUTION, IN1, IN3, IN2, IN4);
+//DHT dht(DHT_PIN,DHT_TYPE);
+DHT_Unified dht(DHT_PIN,DHT_TYPE);
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+uint32_t last_millis;
+sensor_t sensor;
+sensors_event_t event;
 
 void setup() {
     Serial.begin(9600);
     stepper_enable();
     servo_enable();
     letturaAnalogici();
-    stepper_movement(STEPS_RPM_NORMAL,100,1); //lo faccio muovere un pò per cambiare i valori 
-    readSUN();
-    //Serial.println("u_sx     u_dx     d_sx     d_dx");
+    lcd.begin(16,2);
+    //myServo_testa.write(30);
+    last_millis=millis();
 }
 
 void loop() {
-    readSUN();
-    //stampa_val_ser();
+    letturaAnalogici();
+    dht_read();
+    stampa_val_ser();
     calculate_movement();
-    readTemp();
-    readHumy();
     lcdPrint();
     delay(LOOP_DELAY);
 }
